@@ -9,38 +9,186 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedResumeRouteImport } from './routes/_authenticated/resume'
+import { Route as AuthenticatedQuestionsRouteImport } from './routes/_authenticated/questions'
+import { Route as AuthenticatedPlacementRouteImport } from './routes/_authenticated/placement'
+import { Route as AuthenticatedPapersRouteImport } from './routes/_authenticated/papers'
+import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/notes'
+import { Route as AuthenticatedInternshipsRouteImport } from './routes/_authenticated/internships'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedCodingRouteImport } from './routes/_authenticated/coding'
+import { Route as AuthenticatedCgpaRouteImport } from './routes/_authenticated/cgpa'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedResumeRoute = AuthenticatedResumeRouteImport.update({
+  id: '/resume',
+  path: '/resume',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedQuestionsRoute = AuthenticatedQuestionsRouteImport.update({
+  id: '/questions',
+  path: '/questions',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlacementRoute = AuthenticatedPlacementRouteImport.update({
+  id: '/placement',
+  path: '/placement',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPapersRoute = AuthenticatedPapersRouteImport.update({
+  id: '/papers',
+  path: '/papers',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNotesRoute = AuthenticatedNotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInternshipsRoute =
+  AuthenticatedInternshipsRouteImport.update({
+    id: '/internships',
+    path: '/internships',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCodingRoute = AuthenticatedCodingRouteImport.update({
+  id: '/coding',
+  path: '/coding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCgpaRoute = AuthenticatedCgpaRouteImport.update({
+  id: '/cgpa',
+  path: '/cgpa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/cgpa': typeof AuthenticatedCgpaRoute
+  '/coding': typeof AuthenticatedCodingRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/internships': typeof AuthenticatedInternshipsRoute
+  '/notes': typeof AuthenticatedNotesRoute
+  '/papers': typeof AuthenticatedPapersRoute
+  '/placement': typeof AuthenticatedPlacementRoute
+  '/questions': typeof AuthenticatedQuestionsRoute
+  '/resume': typeof AuthenticatedResumeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/cgpa': typeof AuthenticatedCgpaRoute
+  '/coding': typeof AuthenticatedCodingRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/internships': typeof AuthenticatedInternshipsRoute
+  '/notes': typeof AuthenticatedNotesRoute
+  '/papers': typeof AuthenticatedPapersRoute
+  '/placement': typeof AuthenticatedPlacementRoute
+  '/questions': typeof AuthenticatedQuestionsRoute
+  '/resume': typeof AuthenticatedResumeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/cgpa': typeof AuthenticatedCgpaRoute
+  '/_authenticated/coding': typeof AuthenticatedCodingRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/internships': typeof AuthenticatedInternshipsRoute
+  '/_authenticated/notes': typeof AuthenticatedNotesRoute
+  '/_authenticated/papers': typeof AuthenticatedPapersRoute
+  '/_authenticated/placement': typeof AuthenticatedPlacementRoute
+  '/_authenticated/questions': typeof AuthenticatedQuestionsRoute
+  '/_authenticated/resume': typeof AuthenticatedResumeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/cgpa'
+    | '/coding'
+    | '/dashboard'
+    | '/internships'
+    | '/notes'
+    | '/papers'
+    | '/placement'
+    | '/questions'
+    | '/resume'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/cgpa'
+    | '/coding'
+    | '/dashboard'
+    | '/internships'
+    | '/notes'
+    | '/papers'
+    | '/placement'
+    | '/questions'
+    | '/resume'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/cgpa'
+    | '/_authenticated/coding'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/internships'
+    | '/_authenticated/notes'
+    | '/_authenticated/papers'
+    | '/_authenticated/placement'
+    | '/_authenticated/questions'
+    | '/_authenticated/resume'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +196,103 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/resume': {
+      id: '/_authenticated/resume'
+      path: '/resume'
+      fullPath: '/resume'
+      preLoaderRoute: typeof AuthenticatedResumeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/questions': {
+      id: '/_authenticated/questions'
+      path: '/questions'
+      fullPath: '/questions'
+      preLoaderRoute: typeof AuthenticatedQuestionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/placement': {
+      id: '/_authenticated/placement'
+      path: '/placement'
+      fullPath: '/placement'
+      preLoaderRoute: typeof AuthenticatedPlacementRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/papers': {
+      id: '/_authenticated/papers'
+      path: '/papers'
+      fullPath: '/papers'
+      preLoaderRoute: typeof AuthenticatedPapersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notes': {
+      id: '/_authenticated/notes'
+      path: '/notes'
+      fullPath: '/notes'
+      preLoaderRoute: typeof AuthenticatedNotesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/internships': {
+      id: '/_authenticated/internships'
+      path: '/internships'
+      fullPath: '/internships'
+      preLoaderRoute: typeof AuthenticatedInternshipsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/coding': {
+      id: '/_authenticated/coding'
+      path: '/coding'
+      fullPath: '/coding'
+      preLoaderRoute: typeof AuthenticatedCodingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cgpa': {
+      id: '/_authenticated/cgpa'
+      path: '/cgpa'
+      fullPath: '/cgpa'
+      preLoaderRoute: typeof AuthenticatedCgpaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCgpaRoute: typeof AuthenticatedCgpaRoute
+  AuthenticatedCodingRoute: typeof AuthenticatedCodingRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedInternshipsRoute: typeof AuthenticatedInternshipsRoute
+  AuthenticatedNotesRoute: typeof AuthenticatedNotesRoute
+  AuthenticatedPapersRoute: typeof AuthenticatedPapersRoute
+  AuthenticatedPlacementRoute: typeof AuthenticatedPlacementRoute
+  AuthenticatedQuestionsRoute: typeof AuthenticatedQuestionsRoute
+  AuthenticatedResumeRoute: typeof AuthenticatedResumeRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCgpaRoute: AuthenticatedCgpaRoute,
+  AuthenticatedCodingRoute: AuthenticatedCodingRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedInternshipsRoute: AuthenticatedInternshipsRoute,
+  AuthenticatedNotesRoute: AuthenticatedNotesRoute,
+  AuthenticatedPapersRoute: AuthenticatedPapersRoute,
+  AuthenticatedPlacementRoute: AuthenticatedPlacementRoute,
+  AuthenticatedQuestionsRoute: AuthenticatedQuestionsRoute,
+  AuthenticatedResumeRoute: AuthenticatedResumeRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
