@@ -25,7 +25,7 @@ const nav = [
   { to: "/questions", label: "Important Questions", icon: FileQuestion },
   { to: "/papers", label: "Previous Year Papers", icon: FileText },
   { to: "/internships", label: "Internships", icon: Briefcase },
-  { to: "/resume", label: "Resume Builder", icon: FileEdit },
+  { to: "/resumes", label: "Resume Builder", icon: FileEdit },
   { to: "/placement", label: "Placement Prep", icon: GraduationCap },
   { to: "/coding", label: "Coding Practice", icon: Code2 },
   { to: "/cgpa", label: "CGPA Calculator", icon: Calculator },
