@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedResumesRouteImport } from './routes/_authenticated/resumes'
 import { Route as AuthenticatedResumeRouteImport } from './routes/_authenticated/resume'
 import { Route as AuthenticatedQuestionsRouteImport } from './routes/_authenticated/questions'
 import { Route as AuthenticatedPlacementRouteImport } from './routes/_authenticated/placement'
@@ -21,6 +22,7 @@ import { Route as AuthenticatedInternshipsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCodingRouteImport } from './routes/_authenticated/coding'
 import { Route as AuthenticatedCgpaRouteImport } from './routes/_authenticated/cgpa'
+import { Route as AuthenticatedResumesIdRouteImport } from './routes/_authenticated/resumes.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -35,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedResumesRoute = AuthenticatedResumesRouteImport.update({
+  id: '/resumes',
+  path: '/resumes',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedResumeRoute = AuthenticatedResumeRouteImport.update({
   id: '/resume',
@@ -82,6 +89,11 @@ const AuthenticatedCgpaRoute = AuthenticatedCgpaRouteImport.update({
   path: '/cgpa',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedResumesIdRoute = AuthenticatedResumesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedResumesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -95,6 +107,8 @@ export interface FileRoutesByFullPath {
   '/placement': typeof AuthenticatedPlacementRoute
   '/questions': typeof AuthenticatedQuestionsRoute
   '/resume': typeof AuthenticatedResumeRoute
+  '/resumes': typeof AuthenticatedResumesRouteWithChildren
+  '/resumes/$id': typeof AuthenticatedResumesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -108,6 +122,8 @@ export interface FileRoutesByTo {
   '/placement': typeof AuthenticatedPlacementRoute
   '/questions': typeof AuthenticatedQuestionsRoute
   '/resume': typeof AuthenticatedResumeRoute
+  '/resumes': typeof AuthenticatedResumesRouteWithChildren
+  '/resumes/$id': typeof AuthenticatedResumesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -123,6 +139,8 @@ export interface FileRoutesById {
   '/_authenticated/placement': typeof AuthenticatedPlacementRoute
   '/_authenticated/questions': typeof AuthenticatedQuestionsRoute
   '/_authenticated/resume': typeof AuthenticatedResumeRoute
+  '/_authenticated/resumes': typeof AuthenticatedResumesRouteWithChildren
+  '/_authenticated/resumes/$id': typeof AuthenticatedResumesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -138,6 +156,8 @@ export interface FileRouteTypes {
     | '/placement'
     | '/questions'
     | '/resume'
+    | '/resumes'
+    | '/resumes/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -151,6 +171,8 @@ export interface FileRouteTypes {
     | '/placement'
     | '/questions'
     | '/resume'
+    | '/resumes'
+    | '/resumes/$id'
   id:
     | '__root__'
     | '/'
@@ -165,6 +187,8 @@ export interface FileRouteTypes {
     | '/_authenticated/placement'
     | '/_authenticated/questions'
     | '/_authenticated/resume'
+    | '/_authenticated/resumes'
+    | '/_authenticated/resumes/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -195,6 +219,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/resumes': {
+      id: '/_authenticated/resumes'
+      path: '/resumes'
+      fullPath: '/resumes'
+      preLoaderRoute: typeof AuthenticatedResumesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/resume': {
       id: '/_authenticated/resume'
@@ -259,8 +290,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCgpaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/resumes/$id': {
+      id: '/_authenticated/resumes/$id'
+      path: '/$id'
+      fullPath: '/resumes/$id'
+      preLoaderRoute: typeof AuthenticatedResumesIdRouteImport
+      parentRoute: typeof AuthenticatedResumesRoute
+    }
   }
 }
+
+interface AuthenticatedResumesRouteChildren {
+  AuthenticatedResumesIdRoute: typeof AuthenticatedResumesIdRoute
+}
+
+const AuthenticatedResumesRouteChildren: AuthenticatedResumesRouteChildren = {
+  AuthenticatedResumesIdRoute: AuthenticatedResumesIdRoute,
+}
+
+const AuthenticatedResumesRouteWithChildren =
+  AuthenticatedResumesRoute._addFileChildren(AuthenticatedResumesRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCgpaRoute: typeof AuthenticatedCgpaRoute
@@ -272,6 +321,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlacementRoute: typeof AuthenticatedPlacementRoute
   AuthenticatedQuestionsRoute: typeof AuthenticatedQuestionsRoute
   AuthenticatedResumeRoute: typeof AuthenticatedResumeRoute
+  AuthenticatedResumesRoute: typeof AuthenticatedResumesRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -284,6 +334,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlacementRoute: AuthenticatedPlacementRoute,
   AuthenticatedQuestionsRoute: AuthenticatedQuestionsRoute,
   AuthenticatedResumeRoute: AuthenticatedResumeRoute,
+  AuthenticatedResumesRoute: AuthenticatedResumesRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
