@@ -134,7 +134,7 @@ function ResumeBuilderPage() {
 
         {/* Preview */}
         <div className="min-w-0">
-          <ResumePreview r={data} template={template} />
+          <ResumePreview r={data} template={template} title={title} />
         </div>
       </div>
     </div>

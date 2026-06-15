@@ -40,7 +40,6 @@ function Landing() {
             <a href="#why" className="text-muted-foreground hover:text-foreground">Why us</a>
           </nav>
           <div className="flex items-center gap-3">
-            <Link to="/resume-builder" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:inline">Resume Builder</Link>
             <Link to="/auth" className="text-sm font-medium text-muted-foreground hover:text-foreground">Sign in</Link>
             <Button asChild><Link to="/auth">Get started</Link></Button>
           </div>
@@ -68,7 +67,7 @@ function Landing() {
               <Link to="/auth">Start Learning <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/resume-builder">Build Resume</Link>
+              <Link to="/auth">Build Resume</Link>
             </Button>
           </div>
 
@@ -101,7 +100,7 @@ function Landing() {
               </div>
             );
             return f.title === "Resume Builder" ? (
-              <Link key={f.title} to="/resume-builder">{inner}</Link>
+              <Link key={f.title} to="/auth">{inner}</Link>
             ) : (
               <div key={f.title}>{inner}</div>
             );

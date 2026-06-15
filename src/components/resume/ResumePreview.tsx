@@ -1,22 +1,53 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Monitor, Smartphone, Printer, FileDown } from "lucide-react";
+import { ZoomIn, ZoomOut, Monitor, Smartphone, FileDown, Loader2 } from "lucide-react";
 import { TemplateView, type TemplateId } from "./templates";
 import type { ResumeData } from "@/lib/resume/types";
+import { toast } from "sonner";
 
-export function ResumePreview({ r, template }: { r: ResumeData; template: TemplateId }) {
+export function ResumePreview({ r, template, title }: { r: ResumeData; template: TemplateId; title?: string }) {
   const [zoom, setZoom] = useState(0.7);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+  const [downloading, setDownloading] = useState(false);
+
+  const safeName = ((title || r.personal.name || "resume").trim() || "resume")
+    .replace(/[^\w\s-]/g, "").replace(/\s+/g, "_").slice(0, 60);
 
   const downloadDoc = () => {
     const node = document.getElementById("resume-print-area");
     if (!node) return;
-    const html = `<html><head><meta charset="utf-8"><title>${r.personal.name || "Resume"}</title></head><body>${node.innerHTML}</body></html>`;
+    const html = `<html><head><meta charset="utf-8"><title>${safeName}</title></head><body>${node.innerHTML}</body></html>`;
     const blob = new Blob(["\ufeff", html], { type: "application/msword" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `${(r.personal.name || "resume").replace(/\s+/g, "_")}.doc`; a.click();
+    const a = document.createElement("a"); a.href = url; a.download = `${safeName}.doc`; a.click();
     URL.revokeObjectURL(url);
+    toast.success("DOCX downloaded");
+  };
+
+  const downloadPDF = async () => {
+    const node = document.getElementById("resume-print-area");
+    if (!node) return;
+    setDownloading(true);
+    const loading = toast.loading("Generating PDF…");
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      await html2pdf()
+        .set({
+          margin: 0,
+          filename: `${safeName}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        } as any)
+        .from(node)
+        .save();
+      toast.success("PDF downloaded", { id: loading });
+    } catch (e) {
+      toast.error("PDF generation failed", { id: loading });
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
@@ -32,7 +63,10 @@ export function ResumePreview({ r, template }: { r: ResumeData; template: Templa
         </div>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={downloadDoc}><FileDown className="mr-1.5 h-4 w-4" /> DOCX</Button>
-          <Button size="sm" onClick={() => window.print()} className="bg-gradient-to-r from-indigo-600 to-violet-600"><Printer className="mr-1.5 h-4 w-4" /> PDF</Button>
+          <Button size="sm" onClick={downloadPDF} disabled={downloading} className="bg-gradient-to-r from-indigo-600 to-violet-600">
+            {downloading ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <FileDown className="mr-1.5 h-4 w-4" />}
+            PDF
+          </Button>
         </div>
       </div>
 

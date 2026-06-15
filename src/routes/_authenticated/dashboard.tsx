@@ -12,7 +12,7 @@ const tiles = [
   { to: "/questions", title: "Important Questions", desc: "Most asked, exam-ready", icon: FileQuestion },
   { to: "/papers", title: "Previous Year Papers", desc: "Year-wise question banks", icon: FileText },
   { to: "/internships", title: "Internships", desc: "Live opportunities", icon: Briefcase },
-  { to: "/resume", title: "Resume Builder", desc: "Build & export to PDF", icon: FileEdit },
+  { to: "/resumes", title: "AI Resume Builder", desc: "Build & export to PDF", icon: FileEdit },
   { to: "/placement", title: "Placement Prep", desc: "Aptitude, HR, DSA", icon: GraduationCap },
   { to: "/coding", title: "Coding Practice", desc: "Curated problem sets", icon: Code2 },
   { to: "/cgpa", title: "CGPA Calculator", desc: "Track your grades", icon: Calculator },
