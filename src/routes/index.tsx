@@ -90,16 +90,24 @@ function Landing() {
           <p className="mt-3 text-muted-foreground">Stop juggling tabs. Everything a student needs, finally together.</p>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map((f) => (
-            <div key={f.title} className="group rounded-xl border border-border bg-card p-6 shadow-card-soft transition-all hover:-translate-y-1 hover:shadow-elegant">
-              <div className="mb-4 grid h-11 w-11 place-items-center rounded-lg bg-gradient-brand text-primary-foreground">
-                <f.icon className="h-5 w-5" />
+          {features.map((f) => {
+            const inner = (
+              <div className="group h-full rounded-xl border border-border bg-card p-6 shadow-card-soft transition-all hover:-translate-y-1 hover:shadow-elegant">
+                <div className="mb-4 grid h-11 w-11 place-items-center rounded-lg bg-gradient-brand text-primary-foreground">
+                  <f.icon className="h-5 w-5" />
+                </div>
+                <h3 className="font-semibold">{f.title}</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground">{f.desc}</p>
               </div>
-              <h3 className="font-semibold">{f.title}</h3>
-              <p className="mt-1.5 text-sm text-muted-foreground">{f.desc}</p>
-            </div>
-          ))}
+            );
+            return f.title === "Resume Builder" ? (
+              <Link key={f.title} to="/resume-builder">{inner}</Link>
+            ) : (
+              <div key={f.title}>{inner}</div>
+            );
+          })}
         </div>
+
       </section>
 
       {/* Why */}
