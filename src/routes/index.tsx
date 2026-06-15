@@ -65,12 +65,13 @@ function Landing() {
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Button asChild size="lg" className="bg-gradient-brand shadow-elegant hover:opacity-90">
-              <Link to="/auth">Start for free <ArrowRight className="ml-1 h-4 w-4" /></Link>
+              <Link to="/auth">Start Learning <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href="#features">Explore features</a>
+              <Link to="/resume-builder">Build Resume</Link>
             </Button>
           </div>
+
           <div className="mx-auto mt-16 grid max-w-3xl grid-cols-3 gap-8 text-center">
             {[["10k+","Students"],["8","Powerful tools"],["100%","Free to use"]].map(([n,l]) => (
               <div key={l}>
