@@ -40,9 +40,11 @@ function Landing() {
             <a href="#why" className="text-muted-foreground hover:text-foreground">Why us</a>
           </nav>
           <div className="flex items-center gap-3">
+            <Link to="/resume-builder" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:inline">Resume Builder</Link>
             <Link to="/auth" className="text-sm font-medium text-muted-foreground hover:text-foreground">Sign in</Link>
             <Button asChild><Link to="/auth">Get started</Link></Button>
           </div>
+
         </div>
       </header>
 
@@ -63,12 +65,13 @@ function Landing() {
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Button asChild size="lg" className="bg-gradient-brand shadow-elegant hover:opacity-90">
-              <Link to="/auth">Start for free <ArrowRight className="ml-1 h-4 w-4" /></Link>
+              <Link to="/auth">Start Learning <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href="#features">Explore features</a>
+              <Link to="/resume-builder">Build Resume</Link>
             </Button>
           </div>
+
           <div className="mx-auto mt-16 grid max-w-3xl grid-cols-3 gap-8 text-center">
             {[["10k+","Students"],["8","Powerful tools"],["100%","Free to use"]].map(([n,l]) => (
               <div key={l}>
@@ -87,16 +90,24 @@ function Landing() {
           <p className="mt-3 text-muted-foreground">Stop juggling tabs. Everything a student needs, finally together.</p>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map((f) => (
-            <div key={f.title} className="group rounded-xl border border-border bg-card p-6 shadow-card-soft transition-all hover:-translate-y-1 hover:shadow-elegant">
-              <div className="mb-4 grid h-11 w-11 place-items-center rounded-lg bg-gradient-brand text-primary-foreground">
-                <f.icon className="h-5 w-5" />
+          {features.map((f) => {
+            const inner = (
+              <div className="group h-full rounded-xl border border-border bg-card p-6 shadow-card-soft transition-all hover:-translate-y-1 hover:shadow-elegant">
+                <div className="mb-4 grid h-11 w-11 place-items-center rounded-lg bg-gradient-brand text-primary-foreground">
+                  <f.icon className="h-5 w-5" />
+                </div>
+                <h3 className="font-semibold">{f.title}</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground">{f.desc}</p>
               </div>
-              <h3 className="font-semibold">{f.title}</h3>
-              <p className="mt-1.5 text-sm text-muted-foreground">{f.desc}</p>
-            </div>
-          ))}
+            );
+            return f.title === "Resume Builder" ? (
+              <Link key={f.title} to="/resume-builder">{inner}</Link>
+            ) : (
+              <div key={f.title}>{inner}</div>
+            );
+          })}
         </div>
+
       </section>
 
       {/* Why */}
