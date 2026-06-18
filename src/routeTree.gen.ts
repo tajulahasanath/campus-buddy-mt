@@ -13,6 +13,7 @@ import { Route as ResumeBuilderRouteImport } from './routes/resume-builder'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedResumesRouteImport } from './routes/_authenticated/resumes'
 import { Route as AuthenticatedResumeRouteImport } from './routes/_authenticated/resume'
 import { Route as AuthenticatedQuestionsRouteImport } from './routes/_authenticated/questions'
@@ -21,7 +22,9 @@ import { Route as AuthenticatedPapersRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/notes'
 import { Route as AuthenticatedInternshipsRouteImport } from './routes/_authenticated/internships'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDailyTestRouteImport } from './routes/_authenticated/daily-test'
 import { Route as AuthenticatedCodingRouteImport } from './routes/_authenticated/coding'
+import { Route as AuthenticatedChallengesRouteImport } from './routes/_authenticated/challenges'
 import { Route as AuthenticatedCgpaRouteImport } from './routes/_authenticated/cgpa'
 import { Route as AuthenticatedResumesIdRouteImport } from './routes/_authenticated/resumes.$id'
 
@@ -43,6 +46,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedResumesRoute = AuthenticatedResumesRouteImport.update({
   id: '/resumes',
@@ -85,9 +93,19 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDailyTestRoute = AuthenticatedDailyTestRouteImport.update({
+  id: '/daily-test',
+  path: '/daily-test',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCodingRoute = AuthenticatedCodingRouteImport.update({
   id: '/coding',
   path: '/coding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedChallengesRoute = AuthenticatedChallengesRouteImport.update({
+  id: '/challenges',
+  path: '/challenges',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCgpaRoute = AuthenticatedCgpaRouteImport.update({
@@ -106,7 +124,9 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/resume-builder': typeof ResumeBuilderRoute
   '/cgpa': typeof AuthenticatedCgpaRoute
+  '/challenges': typeof AuthenticatedChallengesRoute
   '/coding': typeof AuthenticatedCodingRoute
+  '/daily-test': typeof AuthenticatedDailyTestRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/internships': typeof AuthenticatedInternshipsRoute
   '/notes': typeof AuthenticatedNotesRoute
@@ -115,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/questions': typeof AuthenticatedQuestionsRoute
   '/resume': typeof AuthenticatedResumeRoute
   '/resumes': typeof AuthenticatedResumesRouteWithChildren
+  '/settings': typeof AuthenticatedSettingsRoute
   '/resumes/$id': typeof AuthenticatedResumesIdRoute
 }
 export interface FileRoutesByTo {
@@ -122,7 +143,9 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/resume-builder': typeof ResumeBuilderRoute
   '/cgpa': typeof AuthenticatedCgpaRoute
+  '/challenges': typeof AuthenticatedChallengesRoute
   '/coding': typeof AuthenticatedCodingRoute
+  '/daily-test': typeof AuthenticatedDailyTestRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/internships': typeof AuthenticatedInternshipsRoute
   '/notes': typeof AuthenticatedNotesRoute
@@ -131,6 +154,7 @@ export interface FileRoutesByTo {
   '/questions': typeof AuthenticatedQuestionsRoute
   '/resume': typeof AuthenticatedResumeRoute
   '/resumes': typeof AuthenticatedResumesRouteWithChildren
+  '/settings': typeof AuthenticatedSettingsRoute
   '/resumes/$id': typeof AuthenticatedResumesIdRoute
 }
 export interface FileRoutesById {
@@ -140,7 +164,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/resume-builder': typeof ResumeBuilderRoute
   '/_authenticated/cgpa': typeof AuthenticatedCgpaRoute
+  '/_authenticated/challenges': typeof AuthenticatedChallengesRoute
   '/_authenticated/coding': typeof AuthenticatedCodingRoute
+  '/_authenticated/daily-test': typeof AuthenticatedDailyTestRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/internships': typeof AuthenticatedInternshipsRoute
   '/_authenticated/notes': typeof AuthenticatedNotesRoute
@@ -149,6 +175,7 @@ export interface FileRoutesById {
   '/_authenticated/questions': typeof AuthenticatedQuestionsRoute
   '/_authenticated/resume': typeof AuthenticatedResumeRoute
   '/_authenticated/resumes': typeof AuthenticatedResumesRouteWithChildren
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/resumes/$id': typeof AuthenticatedResumesIdRoute
 }
 export interface FileRouteTypes {
@@ -158,7 +185,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/resume-builder'
     | '/cgpa'
+    | '/challenges'
     | '/coding'
+    | '/daily-test'
     | '/dashboard'
     | '/internships'
     | '/notes'
@@ -167,6 +196,7 @@ export interface FileRouteTypes {
     | '/questions'
     | '/resume'
     | '/resumes'
+    | '/settings'
     | '/resumes/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -174,7 +204,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/resume-builder'
     | '/cgpa'
+    | '/challenges'
     | '/coding'
+    | '/daily-test'
     | '/dashboard'
     | '/internships'
     | '/notes'
@@ -183,6 +215,7 @@ export interface FileRouteTypes {
     | '/questions'
     | '/resume'
     | '/resumes'
+    | '/settings'
     | '/resumes/$id'
   id:
     | '__root__'
@@ -191,7 +224,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/resume-builder'
     | '/_authenticated/cgpa'
+    | '/_authenticated/challenges'
     | '/_authenticated/coding'
+    | '/_authenticated/daily-test'
     | '/_authenticated/dashboard'
     | '/_authenticated/internships'
     | '/_authenticated/notes'
@@ -200,6 +235,7 @@ export interface FileRouteTypes {
     | '/_authenticated/questions'
     | '/_authenticated/resume'
     | '/_authenticated/resumes'
+    | '/_authenticated/settings'
     | '/_authenticated/resumes/$id'
   fileRoutesById: FileRoutesById
 }
@@ -239,6 +275,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/resumes': {
       id: '/_authenticated/resumes'
@@ -296,11 +339,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/daily-test': {
+      id: '/_authenticated/daily-test'
+      path: '/daily-test'
+      fullPath: '/daily-test'
+      preLoaderRoute: typeof AuthenticatedDailyTestRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/coding': {
       id: '/_authenticated/coding'
       path: '/coding'
       fullPath: '/coding'
       preLoaderRoute: typeof AuthenticatedCodingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/challenges': {
+      id: '/_authenticated/challenges'
+      path: '/challenges'
+      fullPath: '/challenges'
+      preLoaderRoute: typeof AuthenticatedChallengesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/cgpa': {
@@ -333,7 +390,9 @@ const AuthenticatedResumesRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCgpaRoute: typeof AuthenticatedCgpaRoute
+  AuthenticatedChallengesRoute: typeof AuthenticatedChallengesRoute
   AuthenticatedCodingRoute: typeof AuthenticatedCodingRoute
+  AuthenticatedDailyTestRoute: typeof AuthenticatedDailyTestRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedInternshipsRoute: typeof AuthenticatedInternshipsRoute
   AuthenticatedNotesRoute: typeof AuthenticatedNotesRoute
@@ -342,11 +401,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedQuestionsRoute: typeof AuthenticatedQuestionsRoute
   AuthenticatedResumeRoute: typeof AuthenticatedResumeRoute
   AuthenticatedResumesRoute: typeof AuthenticatedResumesRouteWithChildren
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCgpaRoute: AuthenticatedCgpaRoute,
+  AuthenticatedChallengesRoute: AuthenticatedChallengesRoute,
   AuthenticatedCodingRoute: AuthenticatedCodingRoute,
+  AuthenticatedDailyTestRoute: AuthenticatedDailyTestRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedInternshipsRoute: AuthenticatedInternshipsRoute,
   AuthenticatedNotesRoute: AuthenticatedNotesRoute,
@@ -355,6 +417,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedQuestionsRoute: AuthenticatedQuestionsRoute,
   AuthenticatedResumeRoute: AuthenticatedResumeRoute,
   AuthenticatedResumesRoute: AuthenticatedResumesRouteWithChildren,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
