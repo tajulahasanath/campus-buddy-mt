@@ -2,12 +2,13 @@ import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } 
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard, BookOpen, FileQuestion, FileText, Briefcase, FileEdit,
-  GraduationCap, Code2, Calculator, LogOut, Menu, X
+  GraduationCap, Code2, Calculator, LogOut, Menu, X, Flame, ClipboardCheck, Settings as SettingsIcon
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -28,7 +29,10 @@ const nav = [
   { to: "/resumes", label: "Resume Builder", icon: FileEdit },
   { to: "/placement", label: "Placement Prep", icon: GraduationCap },
   { to: "/coding", label: "Coding Practice", icon: Code2 },
+  { to: "/challenges", label: "Daily Challenges", icon: Flame },
+  { to: "/daily-test", label: "Daily Interview Test", icon: ClipboardCheck },
   { to: "/cgpa", label: "CGPA Calculator", icon: Calculator },
+  { to: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
 
 function AuthedLayout() {
@@ -37,6 +41,7 @@ function AuthedLayout() {
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => { setOpen(false); }, [pathname]);
 
@@ -69,7 +74,7 @@ function AuthedLayout() {
             const active = pathname === n.to;
             return (
               <Link key={n.to} to={n.to} className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-gradient-brand text-primary-foreground shadow-elegant" : "text-sidebar-foreground hover:bg-sidebar-accent"}`}>
-                <n.icon className="h-4 w-4" /> {n.label}
+                <n.icon className="h-4 w-4" /> {t(n.label)}
               </Link>
             );
           })}
@@ -81,7 +86,7 @@ function AuthedLayout() {
               <div className="truncate text-sm font-medium">{user.user_metadata?.full_name || user.email}</div>
               <div className="truncate text-xs text-muted-foreground">{user.email}</div>
             </div>
-            <Button size="icon" variant="ghost" onClick={handleSignOut} title="Sign out"><LogOut className="h-4 w-4" /></Button>
+            <Button size="icon" variant="ghost" onClick={handleSignOut} title={t("Sign out")}><LogOut className="h-4 w-4" /></Button>
           </div>
         </div>
       </aside>
@@ -93,7 +98,7 @@ function AuthedLayout() {
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur lg:px-8">
           <button className="lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu"><Menu className="h-5 w-5" /></button>
           <div className="text-sm font-medium text-muted-foreground">
-            {nav.find((n) => n.to === pathname)?.label || "Student Hub"}
+            {(() => { const label = nav.find((n) => n.to === pathname)?.label; return label ? t(label) : "Student Hub"; })()}
           </div>
         </header>
         <main className="flex-1 p-4 lg:p-8"><Outlet /></main>

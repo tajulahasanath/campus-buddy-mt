@@ -1,11 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { FileEdit, Plus, Copy, Trash2, Sparkles, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FileEdit, Plus, Copy, Trash2, Sparkles, Clock, Search } from "lucide-react";
 import { EMPTY_RESUME, type ResumeData } from "@/lib/resume/types";
 import { computeCompletion } from "@/lib/resume/ats";
 import { toast } from "sonner";
@@ -21,6 +24,9 @@ type Row = { id: string; title: string; template_id: string; data: ResumeData; u
 function ResumeDashboard() {
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<"updated_desc" | "updated_asc" | "created_desc" | "title_asc" | "title_desc">("updated_desc");
+
 
   const { data: rows, isLoading } = useQuery({
     queryKey: ["resumes"],
@@ -62,6 +68,23 @@ function ResumeDashboard() {
     onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["resumes"] }); },
   });
 
+  const filtered = useMemo<Row[]>(() => {
+    if (!rows) return [];
+    const q = search.trim().toLowerCase();
+    const list = q ? rows.filter((r) => r.title.toLowerCase().includes(q)) : rows.slice();
+    list.sort((a, b) => {
+      switch (sort) {
+        case "updated_asc": return +new Date(a.updated_at) - +new Date(b.updated_at);
+        case "created_desc": return +new Date(b.created_at) - +new Date(a.created_at);
+        case "title_asc": return a.title.localeCompare(b.title);
+        case "title_desc": return b.title.localeCompare(a.title);
+        case "updated_desc":
+        default: return +new Date(b.updated_at) - +new Date(a.updated_at);
+      }
+    });
+    return list;
+  }, [rows, search, sort]);
+
   return (
     <div className="mx-auto max-w-7xl">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
@@ -74,6 +97,25 @@ function ResumeDashboard() {
           <Plus className="mr-2 h-4 w-4" /> New Resume
         </Button>
       </div>
+
+      {rows && rows.length > 0 && (
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by title…" className="pl-9" />
+          </div>
+          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+            <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="updated_desc">Recently updated</SelectItem>
+              <SelectItem value="updated_asc">Least recently updated</SelectItem>
+              <SelectItem value="created_desc">Newest first</SelectItem>
+              <SelectItem value="title_asc">Title A → Z</SelectItem>
+              <SelectItem value="title_desc">Title Z → A</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">{[1, 2, 3].map((i) => <Card key={i} className="h-44 animate-pulse" />)}</div>
@@ -88,9 +130,14 @@ function ResumeDashboard() {
             <Plus className="mr-2 h-4 w-4" /> Get Started
           </Button>
         </Card>
+      ) : filtered.length === 0 ? (
+        <Card className="grid place-items-center gap-2 p-12 text-center text-muted-foreground">
+          <Search className="h-6 w-6" />
+          <p>No resumes match "{search}"</p>
+        </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {rows.map((row) => {
+          {filtered.map((row) => {
             const pct = computeCompletion(row.data);
             return (
               <Card key={row.id} className="group flex flex-col p-5 transition-shadow hover:shadow-elegant">
