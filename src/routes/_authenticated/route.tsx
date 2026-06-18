@@ -74,7 +74,7 @@ function AuthedLayout() {
             const active = pathname === n.to;
             return (
               <Link key={n.to} to={n.to} className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-gradient-brand text-primary-foreground shadow-elegant" : "text-sidebar-foreground hover:bg-sidebar-accent"}`}>
-                <n.icon className="h-4 w-4" /> {n.label}
+                <n.icon className="h-4 w-4" /> {t(n.label)}
               </Link>
             );
           })}
