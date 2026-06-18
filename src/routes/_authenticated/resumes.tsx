@@ -1,11 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { FileEdit, Plus, Copy, Trash2, Sparkles, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FileEdit, Plus, Copy, Trash2, Sparkles, Clock, Search } from "lucide-react";
 import { EMPTY_RESUME, type ResumeData } from "@/lib/resume/types";
 import { computeCompletion } from "@/lib/resume/ats";
 import { toast } from "sonner";
