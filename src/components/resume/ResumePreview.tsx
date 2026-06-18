@@ -5,24 +5,32 @@ import { ZoomIn, ZoomOut, Monitor, Smartphone, FileDown, Loader2 } from "lucide-
 import { TemplateView, type TemplateId } from "./templates";
 import type { ResumeData } from "@/lib/resume/types";
 import { toast } from "sonner";
+import { buildResumeDocx, normalizeFilename } from "@/lib/resume/docx-export";
 
 export function ResumePreview({ r, template, title }: { r: ResumeData; template: TemplateId; title?: string }) {
   const [zoom, setZoom] = useState(0.7);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [downloading, setDownloading] = useState(false);
+  const [downloadingDoc, setDownloadingDoc] = useState(false);
 
-  const safeName = ((title || r.personal.name || "resume").trim() || "resume")
-    .replace(/[^\w\s-]/g, "").replace(/\s+/g, "_").slice(0, 60);
+  const safeName = normalizeFilename(title || r.personal.name || "resume");
 
-  const downloadDoc = () => {
-    const node = document.getElementById("resume-print-area");
-    if (!node) return;
-    const html = `<html><head><meta charset="utf-8"><title>${safeName}</title></head><body>${node.innerHTML}</body></html>`;
-    const blob = new Blob(["\ufeff", html], { type: "application/msword" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `${safeName}.doc`; a.click();
-    URL.revokeObjectURL(url);
-    toast.success("DOCX downloaded");
+  const downloadDoc = async () => {
+    setDownloadingDoc(true);
+    const loading = toast.loading("Generating DOCX…");
+    try {
+      const blob = await buildResumeDocx(r);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = `${safeName}.docx`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      toast.success("DOCX downloaded", { id: loading });
+    } catch (e) {
+      toast.error("DOCX generation failed", { id: loading });
+    } finally {
+      setDownloadingDoc(false);
+    }
   };
 
   const downloadPDF = async () => {
