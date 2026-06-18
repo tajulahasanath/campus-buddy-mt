@@ -86,7 +86,7 @@ function AuthedLayout() {
               <div className="truncate text-sm font-medium">{user.user_metadata?.full_name || user.email}</div>
               <div className="truncate text-xs text-muted-foreground">{user.email}</div>
             </div>
-            <Button size="icon" variant="ghost" onClick={handleSignOut} title="Sign out"><LogOut className="h-4 w-4" /></Button>
+            <Button size="icon" variant="ghost" onClick={handleSignOut} title={t("Sign out")}><LogOut className="h-4 w-4" /></Button>
           </div>
         </div>
       </aside>
