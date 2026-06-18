@@ -81,6 +81,25 @@ function ResumeDashboard() {
         </Button>
       </div>
 
+      {rows && rows.length > 0 && (
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by title…" className="pl-9" />
+          </div>
+          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+            <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="updated_desc">Recently updated</SelectItem>
+              <SelectItem value="updated_asc">Least recently updated</SelectItem>
+              <SelectItem value="created_desc">Newest first</SelectItem>
+              <SelectItem value="title_asc">Title A → Z</SelectItem>
+              <SelectItem value="title_desc">Title Z → A</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">{[1, 2, 3].map((i) => <Card key={i} className="h-44 animate-pulse" />)}</div>
       ) : !rows || rows.length === 0 ? (
@@ -94,9 +113,15 @@ function ResumeDashboard() {
             <Plus className="mr-2 h-4 w-4" /> Get Started
           </Button>
         </Card>
+      ) : filtered.length === 0 ? (
+        <Card className="grid place-items-center gap-2 p-12 text-center text-muted-foreground">
+          <Search className="h-6 w-6" />
+          <p>No resumes match "{search}"</p>
+        </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {rows.map((row) => {
+          {filtered.map((row) => {
+            const pct = computeCompletion(row.data);
             const pct = computeCompletion(row.data);
             return (
               <Card key={row.id} className="group flex flex-col p-5 transition-shadow hover:shadow-elegant">
