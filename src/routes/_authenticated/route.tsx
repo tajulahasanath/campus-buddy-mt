@@ -98,7 +98,7 @@ function AuthedLayout() {
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur lg:px-8">
           <button className="lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu"><Menu className="h-5 w-5" /></button>
           <div className="text-sm font-medium text-muted-foreground">
-            {nav.find((n) => n.to === pathname)?.label || "Student Hub"}
+            {(() => { const label = nav.find((n) => n.to === pathname)?.label; return label ? t(label) : "Student Hub"; })()}
           </div>
         </header>
         <main className="flex-1 p-4 lg:p-8"><Outlet /></main>
