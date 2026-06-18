@@ -24,6 +24,9 @@ type Row = { id: string; title: string; template_id: string; data: ResumeData; u
 function ResumeDashboard() {
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<"updated_desc" | "updated_asc" | "created_desc" | "title_asc" | "title_desc">("updated_desc");
+
 
   const { data: rows, isLoading } = useQuery({
     queryKey: ["resumes"],
