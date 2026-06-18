@@ -122,7 +122,6 @@ function ResumeDashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((row) => {
             const pct = computeCompletion(row.data);
-            const pct = computeCompletion(row.data);
             return (
               <Card key={row.id} className="group flex flex-col p-5 transition-shadow hover:shadow-elegant">
                 <div className="mb-3 flex items-start justify-between gap-2">
