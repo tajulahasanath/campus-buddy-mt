@@ -29,7 +29,10 @@ const nav = [
   { to: "/resumes", label: "Resume Builder", icon: FileEdit },
   { to: "/placement", label: "Placement Prep", icon: GraduationCap },
   { to: "/coding", label: "Coding Practice", icon: Code2 },
+  { to: "/challenges", label: "Daily Challenges", icon: Flame },
+  { to: "/daily-test", label: "Daily Interview Test", icon: ClipboardCheck },
   { to: "/cgpa", label: "CGPA Calculator", icon: Calculator },
+  { to: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
 
 function AuthedLayout() {
