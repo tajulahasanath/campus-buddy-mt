@@ -70,7 +70,10 @@ export function ResumePreview({ r, template, title }: { r: ResumeData; template:
           <Button size="icon" variant={device === "mobile" ? "default" : "ghost"} onClick={() => setDevice("mobile")}><Smartphone className="h-4 w-4" /></Button>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={downloadDoc}><FileDown className="mr-1.5 h-4 w-4" /> DOCX</Button>
+          <Button size="sm" variant="outline" onClick={downloadDoc} disabled={downloadingDoc}>
+            {downloadingDoc ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <FileDown className="mr-1.5 h-4 w-4" />}
+            DOCX
+          </Button>
           <Button size="sm" onClick={downloadPDF} disabled={downloading} className="bg-gradient-to-r from-indigo-600 to-violet-600">
             {downloading ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <FileDown className="mr-1.5 h-4 w-4" />}
             PDF
