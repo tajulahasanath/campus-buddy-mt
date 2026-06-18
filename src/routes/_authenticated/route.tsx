@@ -2,8 +2,13 @@ import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } 
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard, BookOpen, FileQuestion, FileText, Briefcase, FileEdit,
-  GraduationCap, Code2, Calculator, LogOut, Menu, X
+  GraduationCap, Code2, Calculator, LogOut, Menu, X, Flame, ClipboardCheck, Settings as SettingsIcon
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
