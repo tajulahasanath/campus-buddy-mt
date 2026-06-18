@@ -74,17 +74,17 @@ const POOL: Record<Level, Problem[]> = {
 const dayIndex = () => Math.floor(Date.now() / 86_400_000);
 const todayProblem = (level: Level) => POOL[level][dayIndex() % POOL[level].length];
 
-type Progress = { completed: string[]; streak: number; lastDay: number };
+type ProgressState = { completed: string[]; streak: number; lastDay: number };
 const KEY = "challenges:progress";
-const loadProgress = (): Progress => {
+const loadProgress = (): ProgressState => {
   try { const v = localStorage.getItem(KEY); if (v) return JSON.parse(v); } catch {}
   return { completed: [], streak: 0, lastDay: 0 };
 };
-const saveProgress = (p: Progress) => { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch {} };
+const saveProgress = (p: ProgressState) => { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch {} };
 
 function ChallengesPage() {
   const { t } = useI18n();
-  const [progress, setProgress] = useState<Progress>(() => ({ completed: [], streak: 0, lastDay: 0 }));
+  const [progress, setProgress] = useState<ProgressState>(() => ({ completed: [], streak: 0, lastDay: 0 }));
   const [tab, setTab] = useState<Level>("Beginner");
 
   useEffect(() => { setProgress(loadProgress()); }, []);
@@ -97,7 +97,7 @@ function ChallengesPage() {
     const today = dayIndex();
     const newStreak = progress.lastDay === today ? progress.streak
       : progress.lastDay === today - 1 ? progress.streak + 1 : 1;
-    const next: Progress = { completed: [...progress.completed, p.id], streak: newStreak, lastDay: today };
+    const next: ProgressState = { completed: [...progress.completed, p.id], streak: newStreak, lastDay: today };
     setProgress(next); saveProgress(next);
     toast.success(`Completed! Streak: ${newStreak} 🔥`);
   };
