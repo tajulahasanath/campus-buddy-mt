@@ -41,6 +41,7 @@ function AuthedLayout() {
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => { setOpen(false); }, [pathname]);
 
