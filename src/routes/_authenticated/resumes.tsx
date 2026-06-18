@@ -68,6 +68,25 @@ function ResumeDashboard() {
     onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["resumes"] }); },
   });
 
+  const filtered = useMemo<Row[]>(() => {
+    if (!rows) return [];
+    const q = search.trim().toLowerCase();
+    const list = q ? rows.filter((r) => r.title.toLowerCase().includes(q)) : rows.slice();
+    list.sort((a, b) => {
+      switch (sort) {
+        case "updated_asc": return +new Date(a.updated_at) - +new Date(b.updated_at);
+        case "created_desc": return +new Date(b.created_at) - +new Date(a.created_at);
+        case "title_asc": return a.title.localeCompare(b.title);
+        case "title_desc": return b.title.localeCompare(a.title);
+        case "updated_desc":
+        default: return +new Date(b.updated_at) - +new Date(a.updated_at);
+      }
+    });
+    return list;
+  }, [rows, search, sort]);
+
+  return (
+
   return (
     <div className="mx-auto max-w-7xl">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
