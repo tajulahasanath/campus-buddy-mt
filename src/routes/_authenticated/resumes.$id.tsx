@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Plus, Trash2, Check, Loader2, ChevronLeft, ChevronRight, Sparkles, GripVertical } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Check, Loader2, ChevronLeft, ChevronRight, Sparkles, GripVertical, Save } from "lucide-react";
 import { EMPTY_RESUME, uid, DEFAULT_SECTION_ORDER, type ResumeData, type Education, type Experience, type Project, type Skill, type Certification, type Internship, type Training, type Reference } from "@/lib/resume/types";
 import { analyzeATS, computeCompletion } from "@/lib/resume/ats";
 import { TEMPLATES, type TemplateId } from "@/components/resume/templates";
