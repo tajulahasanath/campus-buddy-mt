@@ -35,6 +35,8 @@ function ResumeDashboard() {
       if (error) throw error;
       return data as unknown as Row[];
     },
+    refetchOnMount: "always",
+    staleTime: 0,
   });
 
   const createNew = useMutation({
