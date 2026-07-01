@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileEdit, Plus, Copy, Trash2, Sparkles, Clock, Search } from "lucide-react";
-import { createEmptyResume, getResumeTitle, normalizeResumeData, type ResumeData } from "@/lib/resume/types";
+import { createEmptyResume, getResumeTitle, normalizeResumeData, toStoredResumeData, type ResumeData } from "@/lib/resume/types";
 import { computeCompletion } from "@/lib/resume/ats";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -46,7 +46,7 @@ function ResumeDashboard() {
       if (!user.user) throw new Error("Not signed in");
       const resumeData = createEmptyResume();
       const { data: createdRow, error } = await supabase.from("resumes").insert({
-        user_id: user.user.id, title: getResumeTitle(resumeData), template_id: "modern", data: resumeData as any,
+        user_id: user.user.id, title: getResumeTitle(resumeData), template_id: "modern", data: toStoredResumeData(resumeData) as any,
       }).select().single();
       if (error) throw error;
       return createdRow as unknown as Row;
@@ -61,7 +61,7 @@ function ResumeDashboard() {
       if (!user.user) throw new Error("Not signed in");
       const data = normalizeResumeData(row.data);
       const { error } = await supabase.from("resumes").insert({
-        user_id: user.user.id, title: `${getResumeTitle(data, row.title)} (copy)`, template_id: row.template_id, data: data as any,
+        user_id: user.user.id, title: `${getResumeTitle(data, row.title)} (copy)`, template_id: row.template_id, data: toStoredResumeData(data) as any,
       });
       if (error) throw error;
     },
