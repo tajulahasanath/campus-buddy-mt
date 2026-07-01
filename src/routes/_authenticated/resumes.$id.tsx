@@ -40,7 +40,7 @@ function ResumeBuilderPage() {
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [loaded, setLoaded] = useState(false);
   const loadedRef = useRef(false);
-  const latestResume = useRef({ data: createEmptyResume(), title: "Untitled Resume" });
+  const latestResume = useRef({ data: createEmptyResume(), title: "Untitled Resume", template: "modern" as TemplateId });
 
   const { data: row, isLoading } = useQuery({
     queryKey: ["resume", id],
@@ -56,9 +56,10 @@ function ResumeBuilderPage() {
       const merged = normalizeResumeData(row.data);
       setData(merged);
       const initialTitle = getResumeTitle(merged, row.title || "Untitled Resume");
-      latestResume.current = { data: merged, title: initialTitle };
+      const initialTemplate = (row.template_id as TemplateId) || "modern";
+      latestResume.current = { data: merged, title: initialTitle, template: initialTemplate };
       setTitle(initialTitle);
-      setTemplate((row.template_id as TemplateId) || "modern");
+      setTemplate(initialTemplate);
       loadedRef.current = true;
       setLoaded(true);
     }
@@ -72,8 +73,8 @@ function ResumeBuilderPage() {
   }, [data, title, loaded]);
 
   useEffect(() => {
-    latestResume.current = { data, title: getResumeTitle(data, title || "Untitled Resume") };
-  }, [data, title]);
+    latestResume.current = { data, title: getResumeTitle(data, title || "Untitled Resume"), template };
+  }, [data, title, template]);
 
   const persist = async (showToast = false) => {
     if (!loaded) return false;
@@ -120,6 +121,15 @@ function ResumeBuilderPage() {
         && currentData.internships.length === 0 && currentData.trainings.length === 0;
       if (empty && (current.title === "Untitled Resume" || !current.title)) {
         void supabase.from("resumes").delete().eq("id", id).then(() => {
+          qc.invalidateQueries({ queryKey: ["resumes"] });
+        });
+      } else {
+        void supabase.from("resumes").update({
+          data: currentData as any,
+          title: getResumeTitle(currentData, current.title || "Untitled Resume"),
+          template_id: current.template,
+          updated_at: new Date().toISOString(),
+        }).eq("id", id).then(() => {
           qc.invalidateQueries({ queryKey: ["resumes"] });
         });
       }
