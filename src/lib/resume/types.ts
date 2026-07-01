@@ -26,6 +26,18 @@ export type ResumeData = {
   sectionOrder: string[];
 };
 
+export type StoredResumeData = ResumeData & {
+  personalInfo: {
+    fullName: string;
+    email: string;
+    phone: string;
+    location: string;
+    linkedin: string;
+    github: string;
+    portfolio: string;
+  };
+};
+
 export const DEFAULT_SECTION_ORDER = [
   "objective", "education", "experience", "internships", "projects", "skills",
   "certifications", "trainings", "achievements", "activities", "languages", "hobbies", "references",
@@ -118,6 +130,22 @@ export function getResumeFullName(raw: unknown): string {
 export function getResumeTitle(data: unknown, fallback = "Untitled Resume"): string {
   const fullName = getResumeFullName(data);
   return fullName ? `${fullName} Resume` : fallback;
+}
+
+export function toStoredResumeData(raw: unknown): StoredResumeData {
+  const resume = normalizeResumeData(raw);
+  return {
+    ...resume,
+    personalInfo: {
+      fullName: resume.personal.name,
+      email: resume.personal.email,
+      phone: resume.personal.phone,
+      location: [resume.personal.city, resume.personal.state, resume.personal.country].filter(Boolean).join(", "),
+      linkedin: resume.personal.linkedin,
+      github: resume.personal.github,
+      portfolio: resume.personal.portfolio,
+    },
+  };
 }
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
