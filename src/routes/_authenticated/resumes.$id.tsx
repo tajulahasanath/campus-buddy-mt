@@ -120,7 +120,7 @@ function ResumeBuilderPage() {
         && currentData.education.length === 0 && currentData.experience.length === 0 && currentData.skills.length === 0
         && currentData.projects.length === 0 && currentData.certifications.length === 0 && currentData.achievements.length === 0
         && currentData.internships.length === 0 && currentData.trainings.length === 0;
-      if (empty && (current.title === "Untitled Resume" || !current.title)) {
+      if (empty) {
         void supabase.from("resumes").delete().eq("id", id).then(() => {
           qc.invalidateQueries({ queryKey: ["resumes"] });
         });
