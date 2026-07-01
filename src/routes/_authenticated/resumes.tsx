@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +47,7 @@ function ResumeDashboard() {
       if (!user.user) throw new Error("Not signed in");
       const resumeData = createEmptyResume();
       const { data: createdRow, error } = await supabase.from("resumes").insert({
-        user_id: user.user.id, title: getResumeTitle(resumeData), template_id: "modern", data: toStoredResumeData(resumeData) as any,
+        user_id: user.user.id, title: getResumeTitle(resumeData), template_id: "modern", data: toStoredResumeData(resumeData) as unknown as Json,
       }).select().single();
       if (error) throw error;
       return createdRow as unknown as Row;
@@ -61,7 +62,7 @@ function ResumeDashboard() {
       if (!user.user) throw new Error("Not signed in");
       const data = normalizeResumeData(row.data);
       const { error } = await supabase.from("resumes").insert({
-        user_id: user.user.id, title: `${getResumeTitle(data, row.title)} (copy)`, template_id: row.template_id, data: toStoredResumeData(data) as any,
+        user_id: user.user.id, title: `${getResumeTitle(data, row.title)} (copy)`, template_id: row.template_id, data: toStoredResumeData(data) as unknown as Json,
       });
       if (error) throw error;
     },
