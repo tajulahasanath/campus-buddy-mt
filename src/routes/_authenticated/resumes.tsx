@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileEdit, Plus, Copy, Trash2, Sparkles, Clock, Search } from "lucide-react";
-import { EMPTY_RESUME, type ResumeData } from "@/lib/resume/types";
+import { createEmptyResume, getResumeTitle, normalizeResumeData, type ResumeData } from "@/lib/resume/types";
 import { computeCompletion } from "@/lib/resume/ats";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -20,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/resumes")({
 });
 
 type Row = { id: string; title: string; template_id: string; data: ResumeData; updated_at: string; created_at: string };
+type DashboardRow = Row & { data: ResumeData; displayTitle: string; completion: number };
 
 function ResumeDashboard() {
   const qc = useQueryClient();
@@ -43,11 +44,12 @@ function ResumeDashboard() {
     mutationFn: async () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not signed in");
-      const { data, error } = await supabase.from("resumes").insert({
-        user_id: user.user.id, title: "Untitled Resume", template_id: "modern", data: EMPTY_RESUME as any,
+      const resumeData = createEmptyResume();
+      const { data: createdRow, error } = await supabase.from("resumes").insert({
+        user_id: user.user.id, title: getResumeTitle(resumeData), template_id: "modern", data: resumeData as any,
       }).select().single();
       if (error) throw error;
-      return data;
+      return createdRow as unknown as Row;
     },
     onSuccess: (row) => { qc.invalidateQueries({ queryKey: ["resumes"] }); navigate({ to: "/resumes/$id", params: { id: row.id } }); },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
@@ -57,8 +59,9 @@ function ResumeDashboard() {
     mutationFn: async (row: Row) => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not signed in");
+      const data = normalizeResumeData(row.data);
       const { error } = await supabase.from("resumes").insert({
-        user_id: user.user.id, title: `${row.title} (copy)`, template_id: row.template_id, data: row.data as any,
+        user_id: user.user.id, title: `${getResumeTitle(data, row.title)} (copy)`, template_id: row.template_id, data: data as any,
       });
       if (error) throw error;
     },
@@ -70,16 +73,25 @@ function ResumeDashboard() {
     onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["resumes"] }); },
   });
 
-  const filtered = useMemo<Row[]>(() => {
+  const filtered = useMemo<DashboardRow[]>(() => {
     if (!rows) return [];
     const q = search.trim().toLowerCase();
-    const list = q ? rows.filter((r) => r.title.toLowerCase().includes(q)) : rows.slice();
+    const normalized = rows.map((row) => {
+      const data = normalizeResumeData(row.data);
+      return {
+        ...row,
+        data,
+        displayTitle: getResumeTitle(data, row.title || "Untitled Resume"),
+        completion: computeCompletion(data),
+      };
+    });
+    const list = q ? normalized.filter((r) => r.displayTitle.toLowerCase().includes(q)) : normalized.slice();
     list.sort((a, b) => {
       switch (sort) {
         case "updated_asc": return +new Date(a.updated_at) - +new Date(b.updated_at);
         case "created_desc": return +new Date(b.created_at) - +new Date(a.created_at);
-        case "title_asc": return a.title.localeCompare(b.title);
-        case "title_desc": return b.title.localeCompare(a.title);
+        case "title_asc": return a.displayTitle.localeCompare(b.displayTitle);
+        case "title_desc": return b.displayTitle.localeCompare(a.displayTitle);
         case "updated_desc":
         default: return +new Date(b.updated_at) - +new Date(a.updated_at);
       }
@@ -140,12 +152,12 @@ function ResumeDashboard() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((row) => {
-            const pct = computeCompletion(row.data);
+            const pct = row.completion;
             return (
               <Card key={row.id} className="group flex flex-col p-5 transition-shadow hover:shadow-elegant">
                 <div className="mb-3 flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <h3 className="truncate font-semibold">{row.title}</h3>
+                    <h3 className="truncate font-semibold">{row.displayTitle}</h3>
                     <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="h-3 w-3" /> {formatDistanceToNow(new Date(row.updated_at), { addSuffix: true })}
                     </p>
@@ -161,7 +173,7 @@ function ResumeDashboard() {
                     <Link to="/resumes/$id" params={{ id: row.id }}><FileEdit className="mr-1.5 h-3.5 w-3.5" /> Edit</Link>
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => duplicate.mutate(row)}><Copy className="h-3.5 w-3.5" /></Button>
-                  <Button size="sm" variant="outline" onClick={() => { if (confirm(`Delete "${row.title}"?`)) remove.mutate(row.id); }} className="text-destructive hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+                  <Button size="sm" variant="outline" onClick={() => { if (confirm(`Delete "${row.displayTitle}"?`)) remove.mutate(row.id); }} className="text-destructive hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>
               </Card>
             );

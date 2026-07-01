@@ -6,6 +6,7 @@ import { TemplateView, type TemplateId } from "./templates";
 import type { ResumeData } from "@/lib/resume/types";
 import { toast } from "sonner";
 import { buildResumeDocx, normalizeFilename } from "@/lib/resume/docx-export";
+import { getResumeTitle } from "@/lib/resume/types";
 
 export function ResumePreview({ r, template, title }: { r: ResumeData; template: TemplateId; title?: string }) {
   const [zoom, setZoom] = useState(0.7);
@@ -13,7 +14,7 @@ export function ResumePreview({ r, template, title }: { r: ResumeData; template:
   const [downloading, setDownloading] = useState(false);
   const [downloadingDoc, setDownloadingDoc] = useState(false);
 
-  const safeName = normalizeFilename(title || r.personal.name || "resume");
+  const safeName = normalizeFilename(title || getResumeTitle(r, "resume"));
 
   const downloadDoc = async () => {
     setDownloadingDoc(true);

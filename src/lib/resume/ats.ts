@@ -1,12 +1,18 @@
-import type { ResumeData } from "./types";
+import { normalizeResumeData, type ResumeData } from "./types";
 
-export function computeCompletion(r: ResumeData): number {
+const filled = (value: unknown) => typeof value === "string" && value.trim().length > 0;
+
+export function computeCompletion(resume: ResumeData | unknown): number {
+  const r = normalizeResumeData(resume);
   const checks = [
-    !!r.personal.name, !!r.personal.email, !!r.personal.phone, !!r.personal.city,
-    !!r.personal.linkedin, !!r.objective && r.objective.length > 30,
-    r.education.length > 0, r.skills.length >= 3, r.projects.length > 0,
-    r.experience.length > 0 || r.internships.length > 0,
-    r.certifications.length > 0, r.achievements.length > 0,
+    filled(r.personal.name), filled(r.personal.email), filled(r.personal.phone), filled(r.personal.city),
+    filled(r.personal.linkedin), filled(r.objective) && r.objective.trim().length > 30,
+    r.education.some((e) => filled(e.college) || filled(e.degree) || filled(e.course)),
+    r.skills.filter((s) => filled(s.name)).length >= 3,
+    r.projects.some((p) => filled(p.title) || filled(p.description) || filled(p.tech)),
+    r.experience.some((e) => filled(e.role) || filled(e.company) || filled(e.description)) ||
+      r.internships.some((i) => filled(i.role) || filled(i.company) || filled(i.description)),
+    r.certifications.some((c) => filled(c.name) || filled(c.org)), r.achievements.some(filled),
   ];
   const done = checks.filter(Boolean).length;
   return Math.round((done / checks.length) * 100);
@@ -19,7 +25,8 @@ export type ATSResult = {
   strengths: string[];
 };
 
-export function analyzeATS(r: ResumeData): ATSResult {
+export function analyzeATS(resume: ResumeData): ATSResult {
+  const r = normalizeResumeData(resume);
   const missing: string[] = [];
   const suggestions: string[] = [];
   const strengths: string[] = [];

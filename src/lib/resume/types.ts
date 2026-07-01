@@ -31,23 +31,93 @@ export const DEFAULT_SECTION_ORDER = [
   "certifications", "trainings", "achievements", "activities", "languages", "hobbies", "references",
 ];
 
-export const EMPTY_RESUME: ResumeData = {
-  personal: { name: "", email: "", phone: "", address: "", city: "", state: "", country: "India", linkedin: "", github: "", portfolio: "", photo: "" },
-  objective: "",
-  education: [],
-  experience: [],
-  internships: [],
-  trainings: [],
-  skills: [],
-  projects: [],
-  certifications: [],
-  achievements: [],
-  activities: [],
-  languages: [],
-  hobbies: [],
-  references: [],
-  social: { twitter: "" },
-  sectionOrder: DEFAULT_SECTION_ORDER,
-};
+export function createEmptyResume(): ResumeData {
+  return {
+    personal: { name: "", email: "", phone: "", address: "", city: "", state: "", country: "India", linkedin: "", github: "", portfolio: "", photo: "" },
+    objective: "",
+    education: [],
+    experience: [],
+    internships: [],
+    trainings: [],
+    skills: [],
+    projects: [],
+    certifications: [],
+    achievements: [],
+    activities: [],
+    languages: [],
+    hobbies: [],
+    references: [],
+    social: { twitter: "" },
+    sectionOrder: [...DEFAULT_SECTION_ORDER],
+  };
+}
+
+export const EMPTY_RESUME: ResumeData = createEmptyResume();
+
+type UnknownRecord = Record<string, unknown>;
+
+const isRecord = (value: unknown): value is UnknownRecord =>
+  !!value && typeof value === "object" && !Array.isArray(value);
+
+const asRecord = (value: unknown): UnknownRecord => (isRecord(value) ? value : {});
+const asString = (value: unknown): string => (typeof value === "string" ? value : "");
+const asArray = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);
+
+export function normalizeResumeData(raw: unknown): ResumeData {
+  const source = asRecord(raw);
+  const base = createEmptyResume();
+  const personal = asRecord(source.personal);
+  const legacyPersonal = asRecord(source.personalInfo);
+  const social = asRecord(source.social);
+  const activities = asArray<string>(source.activities);
+  const legacyActivities = asArray<string>(source.extraCurricular);
+  const fullName = asString(personal.name) || asString(legacyPersonal.fullName) || asString(legacyPersonal.name);
+  const location = asString(legacyPersonal.location);
+
+  return {
+    ...base,
+    personal: {
+      ...base.personal,
+      name: fullName,
+      email: asString(personal.email) || asString(legacyPersonal.email),
+      phone: asString(personal.phone) || asString(legacyPersonal.phone),
+      address: asString(personal.address) || asString(legacyPersonal.address),
+      city: asString(personal.city) || location,
+      state: asString(personal.state),
+      country: asString(personal.country) || asString(legacyPersonal.country) || base.personal.country,
+      linkedin: asString(personal.linkedin) || asString(legacyPersonal.linkedin),
+      github: asString(personal.github) || asString(legacyPersonal.github),
+      portfolio: asString(personal.portfolio) || asString(legacyPersonal.portfolio),
+      photo: asString(personal.photo),
+    },
+    objective: asString(source.objective) || asString(source.careerObjective) || asString(source.summary),
+    education: asArray<Education>(source.education),
+    experience: asArray<Experience>(source.experience),
+    internships: asArray<Internship>(source.internships),
+    trainings: asArray<Training>(source.trainings),
+    skills: asArray<Skill>(source.skills),
+    projects: asArray<Project>(source.projects),
+    certifications: asArray<Certification>(source.certifications),
+    achievements: asArray<string>(source.achievements),
+    activities: activities.length ? activities : legacyActivities,
+    languages: asArray<string>(source.languages),
+    hobbies: asArray<string>(source.hobbies),
+    references: asArray<Reference>(source.references),
+    social: { twitter: asString(social.twitter) },
+    sectionOrder: asArray<string>(source.sectionOrder).length ? asArray<string>(source.sectionOrder) : [...DEFAULT_SECTION_ORDER],
+  };
+}
+
+export function getResumeFullName(raw: unknown): string {
+  const source = asRecord(raw);
+  const personal = asRecord(source.personal);
+  const legacyPersonal = asRecord(source.personalInfo);
+  return (asString(personal.name) || asString(legacyPersonal.fullName) || asString(legacyPersonal.name)).trim();
+}
+
+export function getResumeTitle(data: unknown, fallback = "Untitled Resume"): string {
+  const fullName = getResumeFullName(data);
+  return fullName ? `${fullName} Resume` : fallback;
+}
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
