@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,7 +83,7 @@ function ResumeBuilderPage() {
     const normalized = normalizeResumeData(data);
     const savedTitle = getResumeTitle(normalized, title || "Untitled Resume");
     const { data: savedRow, error } = await supabase.from("resumes").update({
-      data: toStoredResumeData(normalized) as any, title: savedTitle, template_id: template, updated_at: new Date().toISOString(),
+      data: toStoredResumeData(normalized) as unknown as Json, title: savedTitle, template_id: template, updated_at: new Date().toISOString(),
     }).eq("id", id).select("id").maybeSingle();
     if (error || !savedRow) {
       toast.error("Save failed");
@@ -125,7 +126,7 @@ function ResumeBuilderPage() {
         });
       } else {
         void supabase.from("resumes").update({
-          data: toStoredResumeData(currentData) as any,
+          data: toStoredResumeData(currentData) as unknown as Json,
           title: getResumeTitle(currentData, current.title || "Untitled Resume"),
           template_id: current.template,
           updated_at: new Date().toISOString(),
