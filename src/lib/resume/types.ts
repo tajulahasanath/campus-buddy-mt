@@ -127,9 +127,23 @@ export function getResumeFullName(raw: unknown): string {
   return (asString(personal.name) || asString(legacyPersonal.fullName) || asString(legacyPersonal.name)).trim();
 }
 
+export function hasResumeContent(raw: unknown): boolean {
+  const r = normalizeResumeData(raw);
+  return [
+    r.personal.name, r.personal.email, r.personal.phone, r.personal.city, r.personal.linkedin,
+    r.objective,
+  ].some((value) => value.trim().length > 0) ||
+    r.education.length > 0 || r.experience.length > 0 || r.internships.length > 0 ||
+    r.trainings.length > 0 || r.skills.length > 0 || r.projects.length > 0 ||
+    r.certifications.length > 0 || r.achievements.length > 0 || r.activities.length > 0 ||
+    r.languages.length > 0 || r.hobbies.length > 0 || r.references.length > 0;
+}
+
 export function getResumeTitle(data: unknown, fallback = "Untitled Resume"): string {
   const fullName = getResumeFullName(data);
-  return fullName ? `${fullName} Resume` : fallback;
+  if (fullName) return `${fullName} Resume`;
+  if (fallback && fallback !== "Untitled Resume") return fallback;
+  return hasResumeContent(data) ? "Resume Draft" : fallback;
 }
 
 export function toStoredResumeData(raw: unknown): StoredResumeData {
