@@ -26,28 +26,140 @@ export type ResumeData = {
   sectionOrder: string[];
 };
 
+export type StoredResumeData = ResumeData & {
+  personalInfo: {
+    fullName: string;
+    email: string;
+    phone: string;
+    location: string;
+    linkedin: string;
+    github: string;
+    portfolio: string;
+  };
+};
+
 export const DEFAULT_SECTION_ORDER = [
   "objective", "education", "experience", "internships", "projects", "skills",
   "certifications", "trainings", "achievements", "activities", "languages", "hobbies", "references",
 ];
 
-export const EMPTY_RESUME: ResumeData = {
-  personal: { name: "", email: "", phone: "", address: "", city: "", state: "", country: "India", linkedin: "", github: "", portfolio: "", photo: "" },
-  objective: "",
-  education: [],
-  experience: [],
-  internships: [],
-  trainings: [],
-  skills: [],
-  projects: [],
-  certifications: [],
-  achievements: [],
-  activities: [],
-  languages: [],
-  hobbies: [],
-  references: [],
-  social: { twitter: "" },
-  sectionOrder: DEFAULT_SECTION_ORDER,
-};
+export function createEmptyResume(): ResumeData {
+  return {
+    personal: { name: "", email: "", phone: "", address: "", city: "", state: "", country: "India", linkedin: "", github: "", portfolio: "", photo: "" },
+    objective: "",
+    education: [],
+    experience: [],
+    internships: [],
+    trainings: [],
+    skills: [],
+    projects: [],
+    certifications: [],
+    achievements: [],
+    activities: [],
+    languages: [],
+    hobbies: [],
+    references: [],
+    social: { twitter: "" },
+    sectionOrder: [...DEFAULT_SECTION_ORDER],
+  };
+}
+
+export const EMPTY_RESUME: ResumeData = createEmptyResume();
+
+type UnknownRecord = Record<string, unknown>;
+
+const isRecord = (value: unknown): value is UnknownRecord =>
+  !!value && typeof value === "object" && !Array.isArray(value);
+
+const asRecord = (value: unknown): UnknownRecord => (isRecord(value) ? value : {});
+const asString = (value: unknown): string => (typeof value === "string" ? value : "");
+const asArray = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);
+
+export function normalizeResumeData(raw: unknown): ResumeData {
+  const source = asRecord(raw);
+  const base = createEmptyResume();
+  const personal = asRecord(source.personal);
+  const legacyPersonal = asRecord(source.personalInfo);
+  const social = asRecord(source.social);
+  const activities = asArray<string>(source.activities);
+  const legacyActivities = asArray<string>(source.extraCurricular);
+  const fullName = asString(personal.name) || asString(legacyPersonal.fullName) || asString(legacyPersonal.name);
+  const location = asString(legacyPersonal.location);
+
+  return {
+    ...base,
+    personal: {
+      ...base.personal,
+      name: fullName,
+      email: asString(personal.email) || asString(legacyPersonal.email),
+      phone: asString(personal.phone) || asString(legacyPersonal.phone),
+      address: asString(personal.address) || asString(legacyPersonal.address),
+      city: asString(personal.city) || location,
+      state: asString(personal.state),
+      country: asString(personal.country) || asString(legacyPersonal.country) || base.personal.country,
+      linkedin: asString(personal.linkedin) || asString(legacyPersonal.linkedin),
+      github: asString(personal.github) || asString(legacyPersonal.github),
+      portfolio: asString(personal.portfolio) || asString(legacyPersonal.portfolio),
+      photo: asString(personal.photo),
+    },
+    objective: asString(source.objective) || asString(source.careerObjective) || asString(source.summary),
+    education: asArray<Education>(source.education),
+    experience: asArray<Experience>(source.experience),
+    internships: asArray<Internship>(source.internships),
+    trainings: asArray<Training>(source.trainings),
+    skills: asArray<Skill>(source.skills),
+    projects: asArray<Project>(source.projects),
+    certifications: asArray<Certification>(source.certifications),
+    achievements: asArray<string>(source.achievements),
+    activities: activities.length ? activities : legacyActivities,
+    languages: asArray<string>(source.languages),
+    hobbies: asArray<string>(source.hobbies),
+    references: asArray<Reference>(source.references),
+    social: { twitter: asString(social.twitter) },
+    sectionOrder: asArray<string>(source.sectionOrder).length ? asArray<string>(source.sectionOrder) : [...DEFAULT_SECTION_ORDER],
+  };
+}
+
+export function getResumeFullName(raw: unknown): string {
+  const source = asRecord(raw);
+  const personal = asRecord(source.personal);
+  const legacyPersonal = asRecord(source.personalInfo);
+  return (asString(personal.name) || asString(legacyPersonal.fullName) || asString(legacyPersonal.name)).trim();
+}
+
+export function hasResumeContent(raw: unknown): boolean {
+  const r = normalizeResumeData(raw);
+  return [
+    r.personal.name, r.personal.email, r.personal.phone, r.personal.city, r.personal.linkedin,
+    r.objective,
+  ].some((value) => value.trim().length > 0) ||
+    r.education.length > 0 || r.experience.length > 0 || r.internships.length > 0 ||
+    r.trainings.length > 0 || r.skills.length > 0 || r.projects.length > 0 ||
+    r.certifications.length > 0 || r.achievements.length > 0 || r.activities.length > 0 ||
+    r.languages.length > 0 || r.hobbies.length > 0 || r.references.length > 0;
+}
+
+export function getResumeTitle(data: unknown, fallback = "Untitled Resume"): string {
+  const fullName = getResumeFullName(data);
+  if (fullName) return `${fullName} Resume`;
+  if (fallback && fallback !== "Untitled Resume") return fallback;
+  return hasResumeContent(data) ? "Resume Draft" : fallback;
+}
+
+export function toStoredResumeData(raw: unknown): StoredResumeData {
+  const resume = normalizeResumeData(raw);
+  return {
+    ...resume,
+    personalInfo: {
+      fullName: resume.personal.name,
+      email: resume.personal.email,
+      phone: resume.personal.phone,
+      location: [resume.personal.city, resume.personal.state, resume.personal.country].filter(Boolean).join(", "),
+      linkedin: resume.personal.linkedin,
+      github: resume.personal.github,
+      portfolio: resume.personal.portfolio,
+    },
+  };
+}
 
 export const uid = () => Math.random().toString(36).slice(2, 10);

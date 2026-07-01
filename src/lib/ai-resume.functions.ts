@@ -9,7 +9,7 @@ const InputSchema = z.object({
 });
 
 async function callOpenAI(system: string, user: string): Promise<string> {
-  const key = process.env.OPENAI_API_KEY;
+  const key = (globalThis as typeof globalThis & { process?: { env?: Record<string, string | undefined> } }).process?.env?.OPENAI_API_KEY;
   if (!key) {
     // Graceful mock so UI keeps working before key is configured
     return `[AI suggestion – sample output]\n${user.slice(0, 200)}…\n\nAdd your OpenAI key in project secrets to enable real AI.`;

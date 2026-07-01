@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Plus, Trash2, Check, Loader2, ChevronLeft, ChevronRight, Sparkles, GripVertical, Save } from "lucide-react";
-import { EMPTY_RESUME, uid, DEFAULT_SECTION_ORDER, type ResumeData, type Education, type Experience, type Project, type Skill, type Certification, type Internship, type Training, type Reference } from "@/lib/resume/types";
+import { createEmptyResume, getResumeTitle, normalizeResumeData, toStoredResumeData, uid, type ResumeData, type Education, type Experience, type Project, type Skill, type Certification, type Internship, type Training, type Reference } from "@/lib/resume/types";
 import { analyzeATS, computeCompletion } from "@/lib/resume/ats";
 import { TEMPLATES, type TemplateId } from "@/components/resume/templates";
 import { ResumePreview } from "@/components/resume/ResumePreview";
@@ -34,12 +35,13 @@ function ResumeBuilderPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [step, setStep] = useState(0);
-  const [data, setData] = useState<ResumeData>(EMPTY_RESUME);
+  const [data, setData] = useState<ResumeData>(() => createEmptyResume());
   const [title, setTitle] = useState("Untitled Resume");
   const [template, setTemplate] = useState<TemplateId>("modern");
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
-  const initialLoad = useRef(true);
-  const titleAuto = useRef(true); // becomes false once user types in title manually
+  const [loaded, setLoaded] = useState(false);
+  const loadedRef = useRef(false);
+  const latestResume = useRef({ data: createEmptyResume(), title: "Untitled Resume", template: "modern" as TemplateId });
 
   const { data: row, isLoading } = useQuery({
     queryKey: ["resume", id],
@@ -51,67 +53,99 @@ function ResumeBuilderPage() {
   });
 
   useEffect(() => {
-    if (row && initialLoad.current) {
-      const d = (row.data ?? {}) as Partial<ResumeData>;
-      const merged: ResumeData = { ...EMPTY_RESUME, ...d, sectionOrder: d.sectionOrder?.length ? d.sectionOrder : DEFAULT_SECTION_ORDER };
+    if (row && !loaded) {
+      const merged = normalizeResumeData(row.data);
       setData(merged);
-      const initialTitle = row.title || "Untitled Resume";
+      const initialTitle = getResumeTitle(merged, row.title || "Untitled Resume");
+      const initialTemplate = (row.template_id as TemplateId) || "modern";
+      latestResume.current = { data: merged, title: initialTitle, template: initialTemplate };
       setTitle(initialTitle);
-      // If saved title already matches the auto pattern (or is empty), allow auto-update; else lock it.
-      const autoFromName = merged.personal.name ? `${merged.personal.name} Resume` : "";
-      titleAuto.current = !initialTitle || initialTitle === "Untitled Resume" || initialTitle === autoFromName;
-      setTemplate((row.template_id as TemplateId) || "modern");
-      initialLoad.current = false;
+      setTemplate(initialTemplate);
+      loadedRef.current = true;
+      setLoaded(true);
     }
-  }, [row]);
+  }, [row, loaded]);
 
-  // Auto-derive title from full name when the user hasn't customised it.
+  // Always derive the dashboard/export title from the full name when present.
   useEffect(() => {
-    if (initialLoad.current) return;
-    if (!titleAuto.current) return;
-    const name = data.personal.name.trim();
-    const next = name ? `${name} Resume` : "Untitled Resume";
+    if (!loaded) return;
+    const next = getResumeTitle(data, title || "Untitled Resume");
     setTitle((t) => (t === next ? t : next));
-  }, [data.personal.name]);
+  }, [data, title, loaded]);
 
-  const persist = async () => {
+  useEffect(() => {
+    latestResume.current = { data, title: getResumeTitle(data, title || "Untitled Resume"), template };
+  }, [data, title, template]);
+
+  const persist = async (showToast = false) => {
+    if (!loaded) return false;
     setSaveState("saving");
-    const { error } = await supabase.from("resumes").update({
-      data: data as any, title, template_id: template, updated_at: new Date().toISOString(),
-    }).eq("id", id);
-    if (error) { toast.error("Save failed"); setSaveState("idle"); return false; }
+    const normalized = normalizeResumeData(data);
+    const savedTitle = getResumeTitle(normalized, title || "Untitled Resume");
+    const { data: savedRow, error } = await supabase.from("resumes").update({
+      data: toStoredResumeData(normalized) as unknown as Json, title: savedTitle, template_id: template, updated_at: new Date().toISOString(),
+    }).eq("id", id).select("id").maybeSingle();
+    if (error || !savedRow) {
+      toast.error("Save failed");
+      setSaveState("idle");
+      return false;
+    }
+    setTitle(savedTitle);
     setSaveState("saved");
-    qc.invalidateQueries({ queryKey: ["resumes"] });
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["resumes"] }),
+      qc.invalidateQueries({ queryKey: ["resume", id] }),
+    ]);
+    if (showToast) toast.success("Resume saved successfully.");
     setTimeout(() => setSaveState("idle"), 1500);
     return true;
   };
 
   // Autosave (debounced)
   useEffect(() => {
-    if (initialLoad.current) return;
+    if (!loaded) return;
     setSaveState("saving");
     const t = setTimeout(() => { void persist(); }, 800);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, title, template, id]);
+  }, [data, title, template, id, loaded]);
 
-  // Cleanup: if user leaves with a completely blank resume, remove the row.
+  // Cleanup only on unmount: remove a newly-created row only if it is still completely blank.
   useEffect(() => {
     return () => {
-      const empty = !data.personal.name && !data.objective && data.education.length === 0
-        && data.experience.length === 0 && data.skills.length === 0 && data.projects.length === 0
-        && data.certifications.length === 0 && data.achievements.length === 0 && data.internships.length === 0;
-      if (empty && (title === "Untitled Resume" || !title)) {
+      if (!loadedRef.current) return;
+      const current = latestResume.current;
+      const currentData = normalizeResumeData(current.data);
+      const empty = !currentData.personal.name && !currentData.personal.email && !currentData.personal.phone && !currentData.objective
+        && currentData.education.length === 0 && currentData.experience.length === 0 && currentData.skills.length === 0
+        && currentData.projects.length === 0 && currentData.certifications.length === 0 && currentData.achievements.length === 0
+        && currentData.internships.length === 0 && currentData.trainings.length === 0;
+      if (empty) {
         void supabase.from("resumes").delete().eq("id", id).then(() => {
+          qc.invalidateQueries({ queryKey: ["resumes"] });
+        });
+      } else {
+        void supabase.from("resumes").update({
+          data: toStoredResumeData(currentData) as unknown as Json,
+          title: getResumeTitle(currentData, current.title || "Untitled Resume"),
+          template_id: current.template,
+          updated_at: new Date().toISOString(),
+        }).eq("id", id).then(() => {
           qc.invalidateQueries({ queryKey: ["resumes"] });
         });
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, title, id]);
+  }, [id, qc]);
+
+  const leaveToDashboard = async () => {
+    const ok = await persist();
+    if (ok) navigate({ to: "/resumes" });
+  };
 
   const completion = useMemo(() => computeCompletion(data), [data]);
   const ats = useMemo(() => analyzeATS(data), [data]);
+  const displayTitle = getResumeTitle(data, title || "Untitled Resume");
 
   if (isLoading) return <div className="grid h-64 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
   if (!row) return <div className="p-8 text-center"><p className="text-muted-foreground">Resume not found.</p><Button asChild className="mt-4"><Link to="/resumes">Back</Link></Button></div>;
@@ -121,8 +155,8 @@ function ResumeBuilderPage() {
       {/* Top bar */}
       <div className="no-print mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-3">
         <div className="flex items-center gap-2">
-          <Button size="icon" variant="ghost" onClick={() => navigate({ to: "/resumes" })}><ArrowLeft className="h-4 w-4" /></Button>
-          <Input value={title} onChange={(e) => { titleAuto.current = false; setTitle(e.target.value); }} className="w-64 border-0 text-base font-semibold focus-visible:ring-1" />
+          <Button size="icon" variant="ghost" onClick={leaveToDashboard}><ArrowLeft className="h-4 w-4" /></Button>
+          <Input value={displayTitle} onChange={(e) => setTitle(e.target.value)} className="w-64 border-0 text-base font-semibold focus-visible:ring-1" />
         </div>
         <div className="flex items-center gap-3">
           <Select value={template} onValueChange={(v) => setTemplate(v as TemplateId)}>
@@ -133,7 +167,7 @@ function ResumeBuilderPage() {
             <Progress value={completion} className="h-2" /> <span className="tabular-nums">{completion}%</span>
           </div>
           <Badge variant={ats.score >= 75 ? "default" : "secondary"} className={ats.score >= 75 ? "bg-emerald-600" : ""}>ATS {ats.score}</Badge>
-          <Button size="sm" variant="outline" onClick={async () => { const ok = await persist(); if (ok) toast.success("Saved"); }} disabled={saveState === "saving"}>
+          <Button size="sm" variant="outline" onClick={() => void persist(true)} disabled={saveState === "saving"}>
             <Save className="mr-1.5 h-3.5 w-3.5" /> Save
           </Button>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -167,7 +201,7 @@ function ResumeBuilderPage() {
               {step < STEPS.length - 1 ? (
                 <Button onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))} className="bg-gradient-to-r from-indigo-600 to-violet-600">Next <ChevronRight className="ml-1 h-4 w-4" /></Button>
               ) : (
-                <Button asChild className="bg-gradient-to-r from-emerald-600 to-emerald-500"><Link to="/resumes">Done</Link></Button>
+                <Button onClick={leaveToDashboard} className="bg-gradient-to-r from-emerald-600 to-emerald-500">Done</Button>
               )}
             </div>
           </Card>
@@ -175,7 +209,7 @@ function ResumeBuilderPage() {
 
         {/* Preview */}
         <div className="min-w-0">
-          <ResumePreview r={data} template={template} title={title} />
+          <ResumePreview r={data} template={template} title={displayTitle} />
         </div>
       </div>
     </div>
