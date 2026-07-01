@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Plus, Trash2, Check, Loader2, ChevronLeft, ChevronRight, Sparkles, GripVertical, Save } from "lucide-react";
-import { createEmptyResume, getResumeTitle, normalizeResumeData, uid, type ResumeData, type Education, type Experience, type Project, type Skill, type Certification, type Internship, type Training, type Reference } from "@/lib/resume/types";
+import { createEmptyResume, getResumeTitle, normalizeResumeData, toStoredResumeData, uid, type ResumeData, type Education, type Experience, type Project, type Skill, type Certification, type Internship, type Training, type Reference } from "@/lib/resume/types";
 import { analyzeATS, computeCompletion } from "@/lib/resume/ats";
 import { TEMPLATES, type TemplateId } from "@/components/resume/templates";
 import { ResumePreview } from "@/components/resume/ResumePreview";
@@ -82,7 +82,7 @@ function ResumeBuilderPage() {
     const normalized = normalizeResumeData(data);
     const savedTitle = getResumeTitle(normalized, title || "Untitled Resume");
     const { data: savedRow, error } = await supabase.from("resumes").update({
-      data: normalized as any, title: savedTitle, template_id: template, updated_at: new Date().toISOString(),
+      data: toStoredResumeData(normalized) as any, title: savedTitle, template_id: template, updated_at: new Date().toISOString(),
     }).eq("id", id).select("id").maybeSingle();
     if (error || !savedRow) {
       toast.error("Save failed");
@@ -125,7 +125,7 @@ function ResumeBuilderPage() {
         });
       } else {
         void supabase.from("resumes").update({
-          data: currentData as any,
+          data: toStoredResumeData(currentData) as any,
           title: getResumeTitle(currentData, current.title || "Untitled Resume"),
           template_id: current.template,
           updated_at: new Date().toISOString(),
