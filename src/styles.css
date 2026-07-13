@@ -138,3 +138,11 @@
   background-clip: text;
   color: transparent;
 }
+
+@media print {
+  /* Hide chrome (sidebar, chat widget, toasters, etc.) during print. */
+  .no-print,
+  [data-no-print],
+  [data-sonner-toaster] { display: none !important; }
+  body { background: white !important; }
+}
