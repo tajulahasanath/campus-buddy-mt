@@ -35,26 +35,18 @@ export function ResumePreview({ r, template, title }: { r: ResumeData; template:
   };
 
   const downloadPDF = async () => {
-    const node = document.getElementById("resume-print-area");
-    if (!node) return;
     setDownloading(true);
-    const loading = toast.loading("Generating PDF…");
+    const prevTitle = document.title;
+    document.title = safeName;
     try {
-      const html2pdf = (await import("html2pdf.js")).default;
-      await html2pdf()
-        .set({
-          margin: 0,
-          filename: `${safeName}.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        })
-        .from(node)
-        .save();
-      toast.success("PDF downloaded", { id: loading });
-    } catch (e) {
-      toast.error("PDF generation failed", { id: loading });
+      // Use the browser's native print dialog → users pick "Save as PDF".
+      // More reliable than jsPDF/html2canvas across fonts, emojis, and layouts.
+      window.print();
+      toast.success('Opened print dialog — choose "Save as PDF"');
+    } catch {
+      toast.error("Could not open print dialog");
     } finally {
+      document.title = prevTitle;
       setDownloading(false);
     }
   };

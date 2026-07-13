@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeProvider } from "@/lib/theme";
 import { I18nProvider } from "@/lib/i18n";
+import { ChatWidget } from "@/components/ChatWidget";
 
 function NotFoundComponent() {
   return (
@@ -99,6 +100,7 @@ function RootComponent() {
       <ThemeProvider>
         <I18nProvider>
           <Outlet />
+          <ChatWidget />
           <Toaster richColors position="top-right" />
         </I18nProvider>
       </ThemeProvider>
