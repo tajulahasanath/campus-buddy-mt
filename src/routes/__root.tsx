@@ -100,6 +100,7 @@ function RootComponent() {
       <ThemeProvider>
         <I18nProvider>
           <Outlet />
+          <ChatWidget />
           <Toaster richColors position="top-right" />
         </I18nProvider>
       </ThemeProvider>
