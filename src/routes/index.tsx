@@ -40,6 +40,7 @@ function Landing() {
             <a href="#why" className="text-muted-foreground hover:text-foreground">Why us</a>
           </nav>
           <div className="flex items-center gap-3">
+            <Link to="/resume-builder" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:inline">Free Resume Builder</Link>
             <Link to="/auth" className="text-sm font-medium text-muted-foreground hover:text-foreground">Sign in</Link>
             <Button asChild><Link to="/auth">Get started</Link></Button>
           </div>
