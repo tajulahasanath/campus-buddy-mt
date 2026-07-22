@@ -23,18 +23,42 @@ function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+ useEffect(() => {
   let active = true;
 
   const goToDashboard = () => {
-    if (!active) return;
-
-    window.setTimeout(() => {
-      if (active) {
-        navigate({ to: "/dashboard", replace: true });
-      }
-    }, 0);
+    if (active) window.location.replace("/dashboard");
   };
+
+  const completeOAuthSignIn = async () => {
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const accessToken = hash.get("access_token");
+    const refreshToken = hash.get("refresh_token");
+
+    if (accessToken && refreshToken) {
+      const { data, error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+      if (!active) return;
+
+      if (error) {
+        toast.error("Could not finish Google sign-in. Please try again.");
+        return;
+      }
+
+      window.history.replaceState(null, "", window.location.pathname);
+
+      if (data.session) goToDashboard();
+      return;
+    }
+
+    const { data } = await supabase.auth.getSession();
+    if (data.session) goToDashboard();
+  };
+
+  void completeOAuthSignIn();
 
   const { data: authListener } = supabase.auth.onAuthStateChange(
     (_event, session) => {
@@ -42,15 +66,11 @@ function AuthPage() {
     },
   );
 
-  supabase.auth.getSession().then(({ data }) => {
-    if (data.session) goToDashboard();
-  });
-
   return () => {
     active = false;
     authListener.subscription.unsubscribe();
   };
-}, [navigate]);
+}, []);
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
