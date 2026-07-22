@@ -24,10 +24,33 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard" });
-    });
-  }, [navigate]);
+  let active = true;
+
+  const goToDashboard = () => {
+    if (!active) return;
+
+    window.setTimeout(() => {
+      if (active) {
+        navigate({ to: "/dashboard", replace: true });
+      }
+    }, 0);
+  };
+
+  const { data: authListener } = supabase.auth.onAuthStateChange(
+    (_event, session) => {
+      if (session) goToDashboard();
+    },
+  );
+
+  supabase.auth.getSession().then(({ data }) => {
+    if (data.session) goToDashboard();
+  });
+
+  return () => {
+    active = false;
+    authListener.subscription.unsubscribe();
+  };
+}, [navigate]);
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
