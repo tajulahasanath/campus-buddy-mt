@@ -34,6 +34,13 @@ function AuthPage() {
     const hash = new URLSearchParams(window.location.hash.slice(1));
     const accessToken = hash.get("access_token");
     const refreshToken = hash.get("refresh_token");
+    const { data: existing } = await supabase.auth.getSession();
+
+if (existing.session) {
+  window.history.replaceState(null, "", window.location.pathname);
+  goToDashboard();
+  return;
+}
 
     if (accessToken && refreshToken) {
       const { data, error } = await supabase.auth.setSession({
