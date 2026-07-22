@@ -55,13 +55,13 @@ function AuthPage() {
     if (!password.success) return toast.error(password.error.issues[0].message);
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
-      email: email.data,
-      password: password.data,
-      redirectTo: `${window.location.origin}/auth`,
-queryParams: { prompt: "select_account" },
-        data: { full_name: name.data },
-      },
-    });
+  email: email.data,
+  password: password.data,
+  options: {
+    emailRedirectTo: `${window.location.origin}/dashboard`,
+    data: { full_name: name.data },
+  },
+});
     setLoading(false);
     if (error) return toast.error(error.message);
     if (!data.session) {
