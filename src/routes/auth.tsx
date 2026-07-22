@@ -71,22 +71,24 @@ queryParams: { prompt: "select_account" },
     toast.success("Account created! Welcome to Student Hub.");
     navigate({ to: "/dashboard" });
   };
+const handleGoogle = async () => {
+  setLoading(true);
 
-  const handleGoogle = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
       redirectTo: `${window.location.origin}/auth`,
-queryParams: {
-  prompt: "select_account",
-},
-    });
-    if (error) {
-      setLoading(false);
-      toast.error("Google sign-in failed");
-    }
-  };
+      queryParams: {
+        prompt: "select_account",
+      },
+    },
+  });
 
+  if (error) {
+    setLoading(false);
+    toast.error("Google sign-in failed");
+  }
+};
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* Brand panel */}
