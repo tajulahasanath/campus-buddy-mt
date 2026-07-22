@@ -57,8 +57,8 @@ function AuthPage() {
     const { data, error } = await supabase.auth.signUp({
       email: email.data,
       password: password.data,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+      redirectTo: `${window.location.origin}/auth`,
+queryParams: { prompt: "select_account" },
         data: { full_name: name.data },
       },
     });
