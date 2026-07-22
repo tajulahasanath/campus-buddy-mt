@@ -31,6 +31,24 @@ function AuthPage() {
   };
 
   const completeOAuthSignIn = async () => {
+    const code = new URLSearchParams(window.location.search).get("code");
+
+if (code) {
+  const { data, error } =
+    await supabase.auth.exchangeCodeForSession(code);
+
+  if (!active) return;
+
+  if (error) {
+    toast.error(error.message);
+    return;
+  }
+
+  window.history.replaceState(null, "", window.location.pathname);
+
+  if (data.session) goToDashboard();
+  return;
+}
     const hash = new URLSearchParams(window.location.hash.slice(1));
     const accessToken = hash.get("access_token");
     const refreshToken = hash.get("refresh_token");
